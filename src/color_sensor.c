@@ -86,7 +86,7 @@ int main(void) {
 		ssize_t sent_bytes;
 		ssize_t read_bytes;
 
-		puts("\nTCS - read sequence begun.\n");
+		puts("TCS - read sequence begun.\n");
 		reg = TCS_CMD_BYTE | TCS_REG_DATA_C_LOW; // TCS_CMD_AUTOINC | TCS_REG_DATA_C_LOW;
 
 		int i;
@@ -103,11 +103,29 @@ int main(void) {
 
 			reg++;
 		}
+		puts("TCS - read sequence done.\n\n");
+		/*
 		for (i = 0; i < 8; i++) {
 			printf("data at %d: %u\n", i, data[i]);
 		}
+		*/
+		uint16_t conversions_16[4];
+		float conversions[4];
 
-		puts("\nTCS - read sequence done.\n");
+		conversions_16[0] = (uint16_t) (data[1] << 8 | data[0]);
+		conversions_16[1] = (uint16_t) (data[3] << 8 | data[2]);
+		conversions_16[2] = (uint16_t) (data[5] << 8 | data[4]);
+		conversions_16[3] = (uint16_t) (data[7] << 8 | data[6]);
+
+		conversions[0] = (float) conversions_16[0] / 655.35;
+		conversions[1] = (float) conversions_16[1] / 655.35;
+		conversions[2] = (float) conversions_16[2] / 655.35;
+		conversions[3] = (float) conversions_16[3] / 655.35;
+
+		printf("Clarity: %.2f %% \n", conversions[0]);
+		printf("Red: %.2f %% \n", conversions[1]);
+		printf("Green: %.2f %% \n", conversions[2]);
+		printf("Blue: %.2f %% \n", conversions[3]);
 
 		puts("Wait for 700 ms\n");
 		usleep(700000);
