@@ -86,25 +86,27 @@ int main(void) {
 		ssize_t sent_bytes;
 		ssize_t read_bytes;
 
-		reg = TCS_CMD_AUTOINC | TCS_REG_DATA_C_LOW; // TCS_CMD_BYTE | TCS_REG_DATA_C_LOW;
-		sent_bytes = write(fd_i2c, &reg, 1);
-		if (sent_bytes < 0)
-			print_error(3);
-		else
-			puts("\nTCS - read sequence begun.\n");
+		puts("\nTCS - read sequence begun.\n");
+		reg = TCS_CMD_BYTE | TCS_REG_DATA_C_LOW; // TCS_CMD_AUTOINC | TCS_REG_DATA_C_LOW;
 
 		int i;
 		for (i = 0; i < 8; i++) {
+			sent_bytes = write(fd_i2c, &reg, 1);
+			if (sent_bytes < 0)
+				print_error(3);
+
 			read_bytes = read(fd_i2c, &data_byte, 1);
 			if (read_bytes != 1)
 				print_error(4);
 			else
 				data[i] = data_byte;
+
+			reg++;
 		}
 		for (i = 0; i < 8; i++) {
 			printf("data at %d: %u\n", i, data[i]);
-			printf("data at %d: %c\n", i, (char) data[i]);
 		}
+
 		puts("\nTCS - read sequence done.\n");
 
 		puts("Wait for 700 ms\n");
