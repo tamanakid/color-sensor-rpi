@@ -41,6 +41,7 @@
 									<listOptionValue builtIn="false" value="/home/dse/Documents/buildroot/output/host/usr/lib"/>
 									<listOptionValue builtIn="false" value="/home/dse/Documents/buildroot/output/host/usr/arm-buildroot-linux-uclibcgnueabi/lib"/>
 									<listOptionValue builtIn="false" value="/home/dse/Documents/buildroot/output/host/usr/arm-buildroot-linux-uclibcgnueabi/sysroot/usr/lib"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Debug}&quot;"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.1110826988" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
