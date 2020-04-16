@@ -8,6 +8,7 @@
 #include "color_sensor.h"
 
 
+
 int get_i2c_descriptor() {
 	int fd_i2c;
 
@@ -49,6 +50,8 @@ void i2c_write(int fd_i2c, uint8_t* registers, int length) {
 		print_error(4);
 
 }
+
+
 
 int i2c_read(int fd_i2c) {
 	uint8_t data_byte;

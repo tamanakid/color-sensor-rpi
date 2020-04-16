@@ -35,6 +35,10 @@
 /* Main file functions */
 int setup(); /* returns file descriptor to I2C interface */
 
+void tcs34725_read(int fd_i2c, uint8_t* data);
+
+void convert_and_print(uint8_t* data);
+
 
 /* Error Control */
 void print_error(int error_code);

@@ -17,8 +17,9 @@
 #include <unistd.h>
 #include <stdint.h>
 
-
 #include "color_sensor.h"
+
+
 
 
 int main(void) {
@@ -27,71 +28,18 @@ int main(void) {
 
 	int fd_i2c = setup();
 
-
-
 	while(1) {
-		uint8_t read_ptr_reg = 0x00;
-		uint8_t data_byte;
 		uint8_t data[8] = {0};
 
-		// Since the integration time is 700ms, we are to wait that amount of time
-		puts("\nWait for 700 ms\n");
-		usleep(700000);
-
-		puts("TCS - read sequence begun.\n");
-		read_ptr_reg = TCS_CMD_BYTE | TCS_REG_DATA_C_LOW; // TCS_CMD_AUTOINC | TCS_REG_DATA_C_LOW;
-
-		int i;
-		for (i = 0; i < 8; i++) {
-			i2c_write(fd_i2c, &read_ptr_reg, 1);
-
-			data_byte = i2c_read(fd_i2c);
-			if (data_byte != -1) {
-				data[i] = data_byte;
-			}
-
-			read_ptr_reg++;
-		}
-		puts("TCS - read sequence done:\n");
-
-		/*
-		for (i = 0; i < 8; i++) {
-			printf("data at %d: %u\n", i, data[i]);
-		}
-		*/
-
-		uint16_t conversions_16[4];
-		float conversions[4];
-
-		conversions_16[0] = (uint16_t) (data[1] << 8 | data[0]);
-		conversions_16[1] = (uint16_t) (data[3] << 8 | data[2]);
-		conversions_16[2] = (uint16_t) (data[5] << 8 | data[4]);
-		conversions_16[3] = (uint16_t) (data[7] << 8 | data[6]);
-
-		conversions[0] = (float) conversions_16[0] / 655.35;
-		conversions[1] = (float) conversions_16[1] / 655.35;
-		conversions[2] = (float) conversions_16[2] / 655.35;
-		conversions[3] = (float) conversions_16[3] / 655.35;
-
-		printf("Clarity: %.2f %% \n", conversions[0]);
-		printf("Red: %.2f %% \n", conversions[1]);
-		printf("Green: %.2f %% \n", conversions[2]);
-		printf("Blue: %.2f %% \n", conversions[3]);
-
-		if ((conversions[1] > conversions[2]*1.5) && (conversions[1] > conversions[3]*1.5)) {
-			printf("Predominant color: RED \n");
-		} else if ((conversions[2] > conversions[1]*1.5) && (conversions[2] > conversions[3]*1.5)) {
-			printf("Predominant color: GREEN \n");
-		} else if ((conversions[3] > conversions[2]*1.5) && (conversions[3] > conversions[1]*1.5)) {
-			printf("Predominant color: BLUE \n");
-		} else {
-			printf("No clear predominant color.\n");
-		}
+		tcs34725_read(fd_i2c, data);
+		convert_and_print(data);
 	}
 
 
 	return EXIT_SUCCESS;
 }
+
+
 
 
 int setup() {
@@ -135,5 +83,77 @@ int setup() {
 }
 
 
+
+
+void tcs34725_read(int fd_i2c, uint8_t* data) {
+	uint8_t read_ptr_reg = 0x00;
+	uint8_t data_byte;
+
+
+	// Since the integration time is 700ms, we are to wait that amount of time
+	puts("\nWait for 700 ms\n");
+	usleep(700000);
+
+
+	puts("TCS - read sequence begun.\n");
+
+	read_ptr_reg = TCS_CMD_BYTE | TCS_REG_DATA_C_LOW; // TCS_CMD_AUTOINC | TCS_REG_DATA_C_LOW;
+	int i;
+	for (i = 0; i < 8; i++) {
+		// Write request to perform read operation
+		i2c_write(fd_i2c, &read_ptr_reg, 1);
+
+		// Read from queried register
+		data_byte = i2c_read(fd_i2c);
+		if (data_byte != -1) {
+			data[i] = data_byte;
+		}
+
+		// Increase read pointer register
+		read_ptr_reg++;
+	}
+
+	puts("TCS - read sequence done:\n");
+
+}
+
+
+
+
+void convert_and_print(uint8_t* data) {
+	uint16_t conversions_16[4];
+	float conversions[4];
+
+
+	// Merge 8-bit register sensor data into 16-bit structures
+	conversions_16[0] = (uint16_t) (data[1] << 8 | data[0]);
+	conversions_16[1] = (uint16_t) (data[3] << 8 | data[2]);
+	conversions_16[2] = (uint16_t) (data[5] << 8 | data[4]);
+	conversions_16[3] = (uint16_t) (data[7] << 8 | data[6]);
+
+	// Convert into percentage-based floating-point numbers.
+	conversions[0] = (float) conversions_16[0] / 655.35;
+	conversions[1] = (float) conversions_16[1] / 655.35;
+	conversions[2] = (float) conversions_16[2] / 655.35;
+	conversions[3] = (float) conversions_16[3] / 655.35;
+
+	printf("Clarity: %.2f %% \n", conversions[0]);
+	printf("Red: %.2f %% \n", conversions[1]);
+	printf("Green: %.2f %% \n", conversions[2]);
+	printf("Blue: %.2f %% \n", conversions[3]);
+
+
+	// Check for color predominance
+	if ((conversions[1] > conversions[2]*1.5) && (conversions[1] > conversions[3]*1.5)) {
+		printf("Predominant color: RED \n");
+	} else if ((conversions[2] > conversions[1]*1.5) && (conversions[2] > conversions[3]*1.5)) {
+		printf("Predominant color: GREEN \n");
+	} else if ((conversions[3] > conversions[2]*1.5) && (conversions[3] > conversions[1]*1.5)) {
+		printf("Predominant color: BLUE \n");
+	} else {
+		printf("No clear predominant color.\n");
+	}
+
+}
 
 
