@@ -28,7 +28,7 @@ int get_i2c_descriptor() {
 
 
 
-void write_cmd_byte(int fd_i2c, uint8_t reg, uint8_t byte) {
+void write_config_byte(int fd_i2c, uint8_t reg, uint8_t byte) {
 	uint8_t registers[2];
 
 	registers[0] = TCS_CMD_BYTE | reg;
@@ -46,7 +46,19 @@ void i2c_write(int fd_i2c, uint8_t* registers, int length) {
 	if (sent_bytes < 0)
 		print_error(3);
 	else if (sent_bytes != length)
-		puts("Bytes sent do not match length expected.\n");
+		print_error(4);
 
+}
+
+int i2c_read(int fd_i2c) {
+	uint8_t data_byte;
+
+	int read_bytes = read(fd_i2c, &data_byte, 1);
+	if (read_bytes != 1) {
+		print_error(5);
+		return -1;
+	} else {
+		return data_byte;
+	}
 }
 

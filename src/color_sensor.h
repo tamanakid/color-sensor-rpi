@@ -32,6 +32,10 @@
 
 
 
+/* Main file functions */
+int setup(); /* returns file descriptor to I2C interface */
+
+
 /* Error Control */
 void print_error(int error_code);
 
@@ -39,9 +43,13 @@ void print_error(int error_code);
 /* Color Sensor Interfacing */
 int get_i2c_descriptor();
 
-void write_cmd_byte(int fd_i2c, uint8_t reg, uint8_t byte);
+void write_config_byte(int fd_i2c, uint8_t reg, uint8_t byte);
+
+void write_read_request(int fd_i2c, uint8_t reg, uint8_t byte);
 
 void i2c_write(int fd_i2c, uint8_t* registers, int length);
+
+int i2c_read(int fd_i2c);
 
 
 
